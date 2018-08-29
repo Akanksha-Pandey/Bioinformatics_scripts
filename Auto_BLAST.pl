@@ -4,8 +4,8 @@ use warnings;
 use Cwd;
 
 # This pipeline is created to extract YouGoGlenCoco and Zelda phages ORF from a list of B type phages
-# It requires the script
-# <Genome_list> List of the genomes stored in BType_phage_genome folder in current working directory (Make sure the makblastdb is executed on these genomes) It should not have any .txt or .fasta in the list file 
+# It requires: 
+# <Genome_list> List of the genomes stored in BType_phage_genome folder in current working directory (Make sure the makblastdb is executed on these genomes) It should not have any ".txt" or ".fasta" in the list file 
 # <Query_list> List of the query sequences stored as a single file in the query folder in current working directory 
 
 my $working_dir = getcwd();
