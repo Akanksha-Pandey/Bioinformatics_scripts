@@ -1,0 +1,62 @@
+---
+title: "Multidimensional scaling plot"
+Author: "Akanksha Pandey"
+output: github_document
+  ---
+```{r setup, include = FALSE, cache = FALSE}
+knitr::opts_chunk$set(error = TRUE)
+```
+R script to create Multidimesional Scaling plot for different amino acid excahnge matices
+
+###Step1: Load data 
+Load your data into R. Here, I have a 38 X 38 matrix of euclidean distances between different amino acid exchange rate matrices
+
+
+```{r}
+# Classical MDS
+# N rows (objects) x p columns (variables)
+# each row identified by a unique row name
+
+row_lable <- c('Bird_Alldata','Bird_Bur','Bird_Exp','Blosum62','Bur_EX2','CpREV','Dayhoff','Dcmut','Eukaryote_2_Bur','Eukaryote_2_Exp','Eukaryote_2_combined','Exp_EX2','Flu','HIVb','HIVw','JTT','JTTDCMUT','Jarvis_250_combined','Jarvis_Bur','Jarvis_Exp','LG','Mammal_250_combined','Mammal_Bur','Mammal_Exp','mtART','mtINV','mtMAM','mtMET','mtREV','mtVER','mtZOA','Oomycetes_Alldata','Oomycetes_Bur','Oomycetes_Exp','PMB','Plant_AllData','Plant_Bur','Plant_Exp','RTrev','VT','WAG','Yeast_BUSCO_AllData','Yeast_BUSCO_Bur','Yeast_BUSCO_Exp')
+
+mydata <- read.csv("Euc_distv7.csv",header = TRUE,sep =  "\t", as.is = TRUE ,row.names = row_lable )#read the csv file for disimmilarity matrix 
+head(mydata)
+```
+###Step2: Fit cmdscale function
+Here I used cmdscal scale function for dimension reduction in 2 coordinates
+
+```{r}
+fit <- cmdscale(mydata, k=2, eig = FALSE)
+fit.frame <- data.frame(fit)
+head(fit.frame)
+```
+###Step3: Plot coordinates from cmdscale function using plot function
+
+```{r}
+# plot solution 
+coordinate1 <- fit.frame[,1]
+coordinate2 <- fit.frame[,2]
+
+rainbow1<-rainbow(38)
+plot(coordinate1, coordinate2, xlab="Coordinate 1", ylab="Coordinate 2", main="MDS for Amino acid exchange rates",	type="p", pch=19,col=rainbow1, cex.main=0.7, las=1, bty="n" )
+text(coordinate1, coordinate2, pos=3,labels = row_lable, cex=0.4,col = "Black")
+
+```
+
+
+###Step4: Plot coordinates from cmdscale using ggplot
+Here I used ggplot for better visulatization. I also colored the datapoints based on groups of exchange rate matrices
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(RColorBrewer)
+fit.frame$bio <- c(row_lable)
+head(mutate(fit.frame, grepl("Exp", bio)))
+fit.frame$col_bio <- ifelse(grepl("Exp",fit.frame$bio), 1, ifelse(grepl("Bur", fit.frame$bio), 2, ifelse(grepl("HELIX", fit.frame$bio), 3, ifelse(grepl("SHEET", fit.frame$bio), 3, ifelse(grepl("COIL", fit.frame$bio), 3, 4)))))
+fit.frame$col_bio <- as.factor(fit.frame$col_bio)
+plot1 <- ggplot(fit.frame, aes(coordinate1,coordinate2,label = c(row_lable), color = col_bio)) + geom_point() +geom_text(check_overlap = TRUE, size=2, vjust =1.4, hjust = 1) +  scale_colour_brewer("Amino acid matrix categories", palette="Dark2",type = "diverging", direction = 1, labels = c('Exposed','Buried','Secondary Structure','Standard Models')) + theme_minimal()
+print(plot1)
+
+```
+
